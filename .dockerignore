@@ -1,0 +1,15 @@
+.git
+.gitignore
+.pytest_cache
+__pycache__
+*.pyc
+catboost_info/
+notebooks/
+data/raw/
+data/processed/
+*.ipynb
+.env
+README.md
+Makefile
+create_eda_notebook.py
+.gemini/
