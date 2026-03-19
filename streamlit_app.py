@@ -135,22 +135,28 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file is not None:
-    with st.spinner("🔄 Procesando predicciones..."):
-        try:
-            files = {"file": (uploaded_file.name, uploaded_file.getvalue(), "application/json")}
-            response = requests.post(f"{API_URL}/api/predict", files=files, timeout=120)
+    # Only call the API if we have a new file (avoid re-running on filter changes)
+    file_key = f"{uploaded_file.name}_{uploaded_file.size}"
+    if st.session_state.get("last_file_key") != file_key:
+        with st.spinner("🔄 Procesando predicciones..."):
+            try:
+                files = {"file": (uploaded_file.name, uploaded_file.getvalue(), "application/json")}
+                response = requests.post(f"{API_URL}/api/predict", files=files, timeout=120)
 
-            if response.status_code != 200:
-                st.error(f"❌ Error del servidor: {response.json().get('detail', 'Unknown error')}")
+                if response.status_code != 200:
+                    st.error(f"❌ Error del servidor: {response.json().get('detail', 'Unknown error')}")
+                    st.stop()
+
+                st.session_state.prediction_data = response.json()
+                st.session_state.last_file_key = file_key
+            except requests.ConnectionError:
+                st.error("❌ No se pudo conectar con el servidor. Verificá que la API esté corriendo.")
+                st.stop()
+            except Exception as e:
+                st.error(f"❌ Error: {e}")
                 st.stop()
 
-            data = response.json()
-        except requests.ConnectionError:
-            st.error("❌ No se pudo conectar con el servidor. Verificá que la API esté corriendo.")
-            st.stop()
-        except Exception as e:
-            st.error(f"❌ Error: {e}")
-            st.stop()
+    data = st.session_state.prediction_data
 
     # ── Summary metrics ────────────────────────────────────────────────────
 

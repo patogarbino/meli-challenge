@@ -4,6 +4,7 @@ numpy==2.4.3
 pandas==2.3.3
 scikit-learn==1.8.0
 optuna==4.8.0
+mlflow==3.10.1
 category_encoders==2.9.0
 
 # EDA / Notebooks
